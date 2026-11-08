@@ -82,6 +82,13 @@ class BigramLanguageModel(nn.Module):
     logits = self.token_embedding_table(idx)
     if targets is None:
       return logits, None
+    
+    # B is batch - how many blocks we are processing at once
+    # T is time - where in the sequence of tokens/characters we are
+    # C is channel - how many possible tokens there are, in this case 65 (vocab_size)
+    
+    # BxTxC logits tensor will give us the scores for each of the elements in the input BxT xb tensor
+    
     B, T, C = logits.shape
     loss = F.cross_entropy(logits.view(B*T, C), targets.view(B*T))
     # Loss is one number that says how wrong the model’s predictions were on a batch. 
@@ -89,7 +96,15 @@ class BigramLanguageModel(nn.Module):
     # Cross entropy is the specific formula used to calculate that number. 
     # It’s the standard choice whenever the model is picking one answer out of several options, 
     # like picking the next character out of 65.
+    
+    # There are B × T positions (4 × 8 = 32), and the C dimension holds the 65 scores at each one. 
+    # Every position gets its own set of 65 scores for “what character comes next here.”
     return logits, loss
+  
+  
+  def generate(self, idx, max_new_tokens):
+    
+    return idx
   
 model = BigramLanguageModel(vocab_size)
 xb, yb = get_batch('train')
